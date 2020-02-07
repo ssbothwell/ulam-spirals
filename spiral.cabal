@@ -1,0 +1,22 @@
+cabal-version:       2.4
+name:                spiral
+version:             0.1.0.0
+-- synopsis:
+-- description:
+-- bug-reports:
+license:             BSD-3-Clause
+license-file:        LICENSE
+author:              Solomon Bothwell
+maintainer:          ssbothwell@gmail.com
+-- copyright:
+-- category:
+extra-source-files:  CHANGELOG.md
+
+executable spiral
+  main-is:             Main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base ^>=4.12.0.0
+  -- hs-source-dirs:
+  default-language:    Haskell2010
+
