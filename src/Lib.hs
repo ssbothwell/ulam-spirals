@@ -81,6 +81,12 @@ dilate x y = scalarMult x ihat :. scalarMult y jhat :. Nil
 subV :: (Semigroup (Vect n a), Num a) => Vect n a -> Vect n a -> Vect n a
 subV x y = x <> (scalarMult (negate 1) y)
 
+infixl 9 !!!
+(!!!) :: Vect n a -> Int -> Maybe a
+(!!!) Nil _       = Nothing
+(!!!) (x :. _)    0 = Just x
+(!!!) (_ :. rest) i = rest !!! (i - 1)
+
 
 --------------------
 --- Common Terms ---
