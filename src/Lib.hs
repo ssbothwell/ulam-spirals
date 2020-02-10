@@ -51,6 +51,9 @@ instance Foldable (Vect n) where
   foldMap _ Nil = mempty
   foldMap f (a :. as) = f a <> foldMap f as
 
+--mkVector :: [a] -> Vect n a
+--mkVector [] = Nil
+--mkVector (x:xs) = x :. mkVector xs
 
 ------------------
 --- Operations ---
@@ -80,6 +83,10 @@ dilate x y = scalarMult x ihat :. scalarMult y jhat :. Nil
 
 subV :: (Semigroup (Vect n a), Num a) => Vect n a -> Vect n a -> Vect n a
 subV x y = x <> (scalarMult (negate 1) y)
+
+----------------
+--- Indexing ---
+----------------
 
 infixl 9 !!!
 (!!!) :: Vect n a -> Int -> Maybe a
