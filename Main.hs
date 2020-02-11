@@ -1,5 +1,8 @@
 module Main where
+
 import Lib
+import Control.Monad
+import Control.Comonad
 import Data.Semigroup
 import Data.List
 
@@ -7,19 +10,6 @@ import Data.List
 -- https://en.wikipedia.org/wiki/Ulam_spiral
 
 main = print "hi"
-
-data Stream a = Stream a (Stream a)
-  deriving Functor
-
-takeS :: Int -> Stream a -> [a]
-takeS 0 (Stream a as) = []
-takeS i (Stream a as) = a : takeS (i - 1) as
-
-mkStream :: (a -> a) -> a -> Stream a
-mkStream f a = Stream a (mkStream f (f a))
-
-instance Show a => Show (Stream a) where
-  show stream = show (takeS 5 stream) <> "..."
 
 type Corner a = Vect ('S ('S 'Z)) (Sum a)
 
@@ -55,6 +45,24 @@ nextCorner (f, s) =
       x = (dirToCorner . nextDiff . cornerToDir) diff
   in (s, s <> x)
 
+---
+
+-- View the body and last element of a list
+viewEnd :: [a] -> ([a], [a])
+viewEnd xs = splitAt (length xs - 1) xs
+
+-- Generate a list of vectors in a line between two Vects on a line
+fromTo :: (Semigroup (Vect n a), Num a, Eq a) => (Vect n a, Vect n a) -> [Vect n a]
+fromTo (v1, v2) =
+  case v1 `subV` v2 of
+    x :. 0 :. Nil -> undefined
+    0 :. y :. Nil -> undefined
+    otherwise -> error "Transform was not on a straight line"
+
+------------
+--- Main ---
+------------
+
 first = mkCorner (0, 0)
 second = mkCorner (1, 0)
 
@@ -64,23 +72,9 @@ zero = (first, second)
 tupleStream :: Stream (Vect ('S ('S 'Z)) Int)
 tupleStream = (fmap getSum) . fst <$> mkStream nextCorner zero
 
-viewEnd :: [a] -> ([a], [a])
-viewEnd xs = splitAt (length xs - 1) xs
-
-(<->) :: [a] -> Stream a -> Stream a
-(<->) [] stream = stream
-(<->) (viewEnd -> (xs, [x])) stream = xs <-> Stream x stream
-
+-- Flatten a Stream of lists into a stream
 func :: Stream [a] -> Stream a
 func (Stream xs stream) = xs <-> func stream
-
-fromTo :: (Semigroup (Vect n a), Num a, Eq a)
-  => (Vect n a, Vect n a) -> [Vect n a]
-fromTo (v1, v2) =
-  case v1 `subV` v2 of
-    x :. 0 :. Nil -> undefined
-    0 :. y :. Nil -> undefined
-    otherwise -> error "Transform was not on a straight line"
 
 tempStream :: Stream (Corner Int)
 tempStream = func $ fromTo <$> mkStream nextCorner zero

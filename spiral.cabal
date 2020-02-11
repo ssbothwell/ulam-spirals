@@ -21,15 +21,20 @@ common deps
                     , InstanceSigs
                     , ViewPatterns
                     , DeriveFunctor
-  build-depends:      base ^>=4.12.0.0
+                    , DeriveFoldable
+                    , DeriveTraversable
+  build-depends:      base >=4.13 && <=4.14
                     , containers
+                    , comonad
 
 library
   import: deps
   hs-source-dirs:      src
   ghc-options:      -ferror-spans -fshow-loaded-modules -Wall
-  exposed-modules:
-    Lib
+  default-language:    Haskell2010
+  exposed-modules:     Lib
+                     , Lib.Stream
+                     , Lib.Vector
 
 executable spiral
   import: deps
