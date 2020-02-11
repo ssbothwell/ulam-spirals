@@ -88,8 +88,16 @@ vZipWith :: (a -> b -> c) -> Vect n a -> Vect n b -> Vect n c
 vZipWith _ Nil Nil = Nil
 vZipWith f (a :. as) (b :. bs) = (f a b) :. (vZipWith f as bs)
 
+infixl 6 .+
+(.+) :: Num a => Vect n a -> Vect n a -> Vect n a
+(.+) = vZipWith (+)
+
 scalarMult :: Num a => a -> Vect n a -> Vect n a
 scalarMult a = fmap (* a)
+
+infixl 7 .*
+(.*) :: Num a => a -> Vect n a -> Vect n a
+(.*) = scalarMult
 
 vconcat :: Monoid a => Vect n a -> a
 vconcat = fold
@@ -103,13 +111,12 @@ swapM = jhat :. ihat :. Nil
 dilate :: Int -> Int -> Matrix ('S ('S 'Z)) ('S ('S 'Z)) Int
 dilate x y = scalarMult x ihat :. scalarMult y jhat :. Nil
 
-subV :: (Semigroup (Vect n a), Num a) => Vect n a -> Vect n a -> Vect n a
-subV x y = x <> (scalarMult (negate 1) y)
+subV :: Num a => Vect n a -> Vect n a -> Vect n a
+subV x y = x .+ (scalarMult (negate 1) y)
 
 infixl 6 .-
-(.-) :: (Semigroup (Vect n a), Num a) => Vect n a -> Vect n a -> Vect n a
+(.-) :: Num a => Vect n a -> Vect n a -> Vect n a
 (.-) = subV
-
 
 ----------------
 --- Indexing ---

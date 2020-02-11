@@ -45,14 +45,14 @@ nextCorner (f, s) =
       x = (dirToCorner . nextDiff . cornerToDir) diff
   in (s, s <> x)
 
----
 
-  -- Generate a list of vectors in a line between two Vects on a line
-fromTo :: (Semigroup (Vect n a), Num a, Eq a) => (Vect n a, Vect n a) -> [Vect n a]
+-- Generate a list of vectors in a line between two Vects on a line
+fromTo ::
+  (Vect ('S ('S 'Z)) Int, Vect ('S ('S 'Z)) Int) -> [Vect ('S ('S 'Z)) Int]
 fromTo (v1, v2) =
   case v1 .- v2 of
-    x :. 0 :. Nil -> undefined
-    0 :. y :. Nil -> undefined
+    x :. 0 :. Nil -> ((.+) v1) <$> [x' :. 0 :. Nil | x' <- [1..abs x]]
+    0 :. y :. Nil -> ((.+) v1) <$> [0 :. y' :. Nil | y' <- [1..abs y]]
     otherwise -> error "Transform was not on a straight line"
 
 ------------
@@ -69,8 +69,8 @@ tupleStream :: Stream (Vect ('S ('S 'Z)) Int)
 tupleStream = (fmap getSum) . fst <$> mkStream nextCorner zero
 
 -- Flatten a Stream of lists into a stream
-func :: Stream [a] -> Stream a
-func (Stream xs stream) = xs <-> func stream
+flatten :: Stream [a] -> Stream a
+flatten (Stream xs stream) = xs <-> flatten stream
 
-tempStream :: Stream (Corner Int)
-tempStream = func $ fromTo <$> mkStream nextCorner zero
+--tempStream :: Stream (Corner Int)
+--tempStream = flatten $ fromTo <$> mkStream nextCorner zero
