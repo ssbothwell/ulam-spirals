@@ -14,7 +14,7 @@ main = print "hi"
 type Corner a = Vect ('S ('S 'Z)) (Sum a)
 
 mkCorner :: (a, a) -> Corner a
-mkCorner (a, b) = Sum a :. Sum b :. Nil
+mkCorner = (fmap Sum) . mkVector2
 
 data Dir a = U (Sum a) | D (Sum a) | L (Sum a) | R (Sum a)
   deriving Show
@@ -26,10 +26,10 @@ dirToCorner (L (Sum a)) = mkCorner (negate a, 0)
 dirToCorner (R (Sum a)) = mkCorner (a, 0)
 
 cornerToDir :: (Ord a, Num a) => Corner a -> Dir a
-cornerToDir (viewCorner -> (x,  Sum 0))
+cornerToDir (viewTuple -> (x,  Sum 0))
   | x > Sum 0 = R x
   | otherwise = L $ negate x
-cornerToDir (viewCorner -> (Sum 0, y))
+cornerToDir (viewTuple -> (Sum 0, y))
   | y > Sum 0 = U y
   | otherwise = D $ negate y
 
@@ -41,20 +41,16 @@ nextDiff (R a) = U a
 
 nextCorner :: (Corner Int, Corner Int) -> (Corner Int, Corner Int)
 nextCorner (f, s) =
-  let diff = s `subV` f :: Corner Int
+  let diff = s .- f :: Corner Int
       x = (dirToCorner . nextDiff . cornerToDir) diff
   in (s, s <> x)
 
 ---
 
--- View the body and last element of a list
-viewEnd :: [a] -> ([a], [a])
-viewEnd xs = splitAt (length xs - 1) xs
-
--- Generate a list of vectors in a line between two Vects on a line
+  -- Generate a list of vectors in a line between two Vects on a line
 fromTo :: (Semigroup (Vect n a), Num a, Eq a) => (Vect n a, Vect n a) -> [Vect n a]
 fromTo (v1, v2) =
-  case v1 `subV` v2 of
+  case v1 .- v2 of
     x :. 0 :. Nil -> undefined
     0 :. y :. Nil -> undefined
     otherwise -> error "Transform was not on a straight line"
