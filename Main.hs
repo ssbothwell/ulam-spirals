@@ -109,9 +109,16 @@ genSpiral n =
       grid' = grid n
   in (fmap . fmap) ((M.!) mp) grid'
 
-printSpiral :: Int -> IO ()
-printSpiral n = traverse_ print (genSpiral n)
+printGrid :: [[Int]] -> IO ()
+printGrid xs = mapM_ putStrLn (fmap ppRow xs)
+  where
+    maxDigit = length . show $ maximum (fmap maximum xs)
+    padTo n x = let s = show x
+                in (replicate (n - length s) =<< " ") <> s
+    ppRow row = "[ " <> (intercalate " , " . map (padTo maxDigit)) row <> " ]"
 
+printSpiral :: Int -> IO ()
+printSpiral n = printGrid (genSpiral n)
 ------------
 --- Main ---
 ------------
