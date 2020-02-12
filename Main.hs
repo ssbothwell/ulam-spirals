@@ -40,7 +40,7 @@ nextDiff = \case
 
 nextCorner :: ((Int, Int), (Int, Int)) -> ((Int, Int), (Int, Int))
 nextCorner (f, s) =
-  let diff = s .- f :: (Int, Int)
+  let diff = s .- f
       newDiff = (dirToCorner . nextDiff . cornerToDir) diff
   in (s, s .+ newDiff)
 
@@ -48,7 +48,6 @@ from :: Int -> Int -> [Int]
 from x y | x < y     = [x .. y]
          | otherwise = [x, x-1 .. y]
 
--- Generate a list of vectors in a line between two Vects on a line
 fromTo :: ((Int, Int), (Int, Int)) -> [(Int, Int)]
 fromTo (v1, v2) =
   case v1 .- v2 of
