@@ -1,6 +1,8 @@
 module Main where
 
 import Data.Foldable
+import Data.List
+import qualified Data.Map.Strict as M
 
 -- https://en.wikipedia.org/wiki/Square_lattice
 -- https://en.wikipedia.org/wiki/Ulam_spiral
@@ -55,9 +57,9 @@ fromTo (v1, v2) =
     (0, y) -> [(fst v2, y') | y' <- from (snd v1) (snd v2)]
     otherwise -> error "Transform was not on a straight line"
 
-------------
---- Main ---
-------------
+------------------
+--- Gen Spiral ---
+------------------
 
 data Stream a = Stream a (Stream a)
 
@@ -77,9 +79,42 @@ chop :: Stream [a] -> Stream [a]
 chop (Stream (viewEnd -> (xs, _)) rest) = Stream xs (chop rest)
 
 genStream :: Stream [(Int, Int)]
-genStream = fromTo <$> mkStream nextCorner ((0, 0), (1, 0))
+genStream = chop $ fromTo <$> mkStream nextCorner ((0, 0), (1, 0))
 
-genList :: [(Int, Int)]
-genList = fold . chop $ genStream
+genList :: Int -> [(Int, Int)]
+genList i = take i . fold $ genStream
 
-main = print $ take 16 genList
+
+-----------------------
+--- Pretty Printing ---
+-----------------------
+
+shiftOrigin :: [(Int, Int)] -> [(Int, Int)]
+shiftOrigin gd = fmap (.- (minimum gd)) gd
+
+addIndex :: [(Int, Int)] -> [((Int, Int), Int)]
+addIndex sp = zip sp [0..]
+
+mkMap :: [(Int, Int)] -> M.Map (Int, Int) Int
+mkMap = M.fromList . addIndex . shiftOrigin 
+
+grid :: Int -> [[(Int, Int)]]
+grid n = unfoldr (\b -> if b == n then Nothing else Just (row b n, b + 1)) 0
+  where
+    row i m = unfoldr (\b -> if b == m then Nothing else Just ((b, i), b + 1)) 0
+
+genSpiral :: Int -> [[Int]]
+genSpiral n =
+  let mp = mkMap $ genList (n^2)
+      grid' = grid n
+  in (fmap . fmap) ((M.!) mp) grid'
+
+printSpiral :: Int -> IO ()
+printSpiral n = traverse_ print (genSpiral n)
+
+------------
+--- Main ---
+------------
+
+main :: IO ()
+main = printSpiral 10
